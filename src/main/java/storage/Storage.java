@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.format.DateTimeParseException;
-import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import exception.StorageException;
@@ -48,51 +46,30 @@ public class Storage {
             String line = scanner.nextLine();
             String[] args = line.split("\\[|\\]\\[|\\] ");
             if (args[1].equals("T")) {
-                assert args.length == 4: "ToDo task should have 4 arguments after split";
-                assert args[0].isEmpty(): "The first argument after splitting ToDo should be empty";
-                String description = args[3];
-                Task task = new ToDo(description);
+                Task task = new ToDo(args[3]);
                 if (args[2].equals("X")) {
                     task.mark();
                 }
                 tasks.add(task);
             } else if (args[1].equals("D")) {
-                assert args.length == 6: "Deadline task should have 6 arguments after split";
-                assert args[0].isEmpty(): "The first argument after splitting Deadline should be empty";
-                assert args[5].isEmpty(): "The last argument after splitting Deadline should be empty";
-                try {
-                    String regex = "\\[|\\]\\[|\\] | \\(by: |\\)";
-                    args = line.split(regex);
-                    String description = args[3];
-                    LocalDateTime deadline = Converter.outputToDateTime(args[4]);
-                    Task task = new Deadline(description, deadline);
-                    if (args[2].equals("X")) {
-                        task.mark();
-                    }
-                    tasks.add(task);
-                } catch (DateTimeParseException e) {
-                    assert false: "The arguments deadline for Deadline should be well-formatted";
+                String regex = "\\[|\\]\\[|\\] | \\(by: |\\)";
+                args = line.split(regex);
+                Task task = new Deadline(args[3], Converter.outputToDateTime(args[4]));
+                if (args[2].equals("X")) {
+                    task.mark();
                 }
+                tasks.add(task);
             } else {
-                assert args[1].equals("D"): "If a task is not ToDo or Deadline, it should be Event";
-                assert args.length == 7: "A event task should have 7 arguments after splitting";
-                assert args[0].isEmpty(): "The first argument after splitting Event should be empty";
-                assert args[6].isEmpty(): "The last argument after splitting Event should be empty";
-                try {
-                    String regex = "\\[|\\]\\[|\\] | \\(from: | to: |\\)";
-                    args = line.split(regex);
-                    String description = args[3];
-                    LocalDateTime start = Converter.outputToDateTime(args[4]);
-                    LocalDateTime end = Converter.outputToDateTime(args[5]);
-                    Task task = new Event(description, start, end);
-                    if (args[2].equals("X")) {
-                        task.mark();
-                    }
-                    tasks.add(task);
-                } catch (DateTimeParseException e) {
-                    assert false: "The arguments start and end for Event should be well-formatted";
+                String regex = "\\[|\\]\\[|\\] | \\(from: | to: |\\)";
+                args = line.split(regex);
+                Task task = new Event(args[3],
+                                        Converter.outputToDateTime(args[4]),
+                                        Converter.outputToDateTime(args[5]));
+                if (args[2].equals("X")) {
+                    task.mark();
                 }
-            } 
+                tasks.add(task);
+            }
         }
         scanner.close();
         return tasks;
